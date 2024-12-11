@@ -1,7 +1,17 @@
 .vs/
 .vscode/
 out/
+
 thirdparty/
+!thirdparty/fetch.cmake
+!thirdparty/getLibOTe.cmake
+!thirdparty/getSparsehash.cmake
+!thirdparty/getSEAL.sh
+
 tests/cmakeTests/
+
+CMakeFiles/
 CMakeSettings.json
+CMakeCache.txt
+
 ~/

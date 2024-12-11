@@ -13,6 +13,9 @@ include(cmake/buildOptions.cmake)
 # find all the dependancies.
 include(cmake/findDependancies.cmake)
 
+# build vectorized Batched PIR
+add_subdirectory(batchPIR)
+
 # build volePSI
 add_subdirectory(volePSI)
 
