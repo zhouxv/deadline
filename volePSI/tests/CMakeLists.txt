@@ -7,13 +7,13 @@
 
 set(SRCS
 	"Paxos_Tests.cpp"
+	"UnitTests.cpp"
     "FileBase_Tests.cpp"
-    "UnitTests.cpp"
 	)
-
+	
 add_library(volePSI_Tests ${SRCS})
 
-target_link_libraries(volePSI_Tests volePSI)
+target_link_libraries(volePSI_Tests PRIVATE volePSI)
 
 
 if(MSVC)

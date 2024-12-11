@@ -26,5 +26,11 @@ namespace volePSI_Tests
         t.add("Baxos_solve_mtx_Test        ", Baxos_solve_mtx_Test);
         t.add("Baxos_solve_par_Test        ", Baxos_solve_par_Test);
         t.add("Baxos_solve_rand_Test       ", Baxos_solve_rand_Test);
+        
+        t.add("filebase_readSet_Test       ", filebase_readSet_Test);
+        t.add("filebase_psi_bin_Test       ", filebase_psi_bin_Test);
+        t.add("filebase_psi_csv_Test       ", filebase_psi_csv_Test);
+        t.add("filebase_psi_csvh_Test      ", filebase_psi_csvh_Test);
+
     });
 }

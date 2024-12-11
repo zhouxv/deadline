@@ -4,7 +4,7 @@
 
 #include "batchpirparams.h"
 #include "client.h"
-#include "src/utils.h"
+#include "utils.h"
 
 using namespace std;
 

@@ -3,7 +3,7 @@
 
 #include "batchpirparams.h"
 #include "server.h"
-#include "src/utils.h"
+#include "utils.h"
 
 
 class BatchPIRServer {

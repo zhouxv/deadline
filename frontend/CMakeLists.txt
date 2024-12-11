@@ -3,14 +3,12 @@ file(GLOB_RECURSE SRCS *.cpp)
 
 add_executable(frontend  ${SRCS})
 
-target_link_libraries(frontend volePSI_Tests)
+target_link_libraries(frontend volePSI_Tests OurImp)
 
 
 if(VOLE_PSI_NO_LTO)
     target_link_options(frontend PUBLIC "-fno-lto")
 endif()
-
-
 
 if(MSVC)
     target_compile_options(frontend PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/std:c++${VOLE_PSI_STD_VER}>)

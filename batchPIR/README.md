@@ -23,6 +23,11 @@ cmake --build build
 ```
 cmake -S . -B out/build -DCMAKE_PREFIX_PATH=out/install/linux
 cmake --build build
+
+cmake -S . -B ../out/build/linux -DCMAKE_PREFIX_PATH=../out/install/linux -DCMAKE_INSTALL_PREFIX=../out/install/linux
+cmake --build ../out/build/linux
+cmake --install ../out/build/linux --config release
+cmake --install /home/dinglab-dell/researches/new_idea/deadline/out/bitpolymul/out/build/linux' '--config' 'Release' '--prefix' '/home/dinglab-dell/researches/new_idea/deadline/out/install/linux'
 ```
 
 Once the build process is complete, run the following command to execute the Vectorized Batch PIR:

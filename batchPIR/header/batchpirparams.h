@@ -5,7 +5,7 @@
 #include <iomanip> 
 #include <cstdlib>
 #include "database_constants.h"
-#include "../src/utils.h"
+#include "utils.h"
 using namespace seal;
 
 class BatchPirParams {

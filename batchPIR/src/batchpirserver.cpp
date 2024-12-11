@@ -1,4 +1,4 @@
-#include "header/batchpirserver.h"
+#include "batchpirserver.h"
 
 BatchPIRServer::BatchPIRServer(BatchPirParams &batchpir_params)
 {

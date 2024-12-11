@@ -19,8 +19,8 @@ add_subdirectory(batchPIR)
 # build volePSI
 add_subdirectory(volePSI)
 
-# build the tests.
-add_subdirectory(tests)
+# build ourImp
+add_subdirectory(ourImp)
 
 # link the executable.
 add_subdirectory(frontend)

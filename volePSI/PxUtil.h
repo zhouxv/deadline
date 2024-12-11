@@ -5,6 +5,12 @@
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 // 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// © 2022 Visa。
+// 特此免费授权任何获得本软件及其相关文档文件（“软件”）的人在不受限制的情况下处理该软件，包括但不限于使用、复制、修改、合并、发布、分发、再许可和/或出售该软件的副本，并允许向其提供软件的人这样做，前提是满足以下条件：
+// 
+// 上述版权声明和本许可声明应包含在所有副本或实质性部分的软件中。
+// 
+// 本软件按“原样”提供，不附有任何形式的保证，无论是明示或暗示，包括但不限于对适销性、特定用途的适用性和不侵权的保证。在任何情况下，作者或版权持有人均不对因使用或其他交易本软件或与本软件有关的任何索赔、损害或其他责任承担责任。
 
 #include <array>
 #include <vector>
@@ -21,16 +27,19 @@ namespace volePSI
 {
 
 	// A permutation (and its inverse) over the set [n].
+	// 在集合 [n] 上的一个排列（及其逆排列）。
 	template<typename IdxType>
 	struct Permutation
 	{
 		// An indexed from the source domain.
+		// 从源域索引的结构。
 		struct SrcIdx
 		{
 			IdxType mIdx;
 		};
 
-		// an index from the distination domain (range)
+		// an index from the destination domain (range)
+		// 从目标域（范围）索引的结构。
 		struct DstIdx
 		{
 			IdxType mIdx;
@@ -71,16 +80,16 @@ namespace volePSI
 			}
 		};
 
-
 		// the permutation in the forward direction, 
 		// mSrc2Dst[i] returns the location i is mapped 
 		// in the output.
+		// 正向排列，mSrc2Dst[i] 返回 i 在输出中的映射位置。
 		std::vector<IdxType> mSrc2Dst;
-
 
 		// the permutation in the backwards direction, 
 		// mDst2Src[i] returns the output location i is mapped 
 		// from in the input.
+		// 反向排列，mDst2Src[i] 返回 i 在输入中的映射位置。
 		std::vector<IdxType> mDst2Src;
 
 		Permutation() = default;
@@ -102,6 +111,7 @@ namespace volePSI
 		}
 
 		// construct a no-op permutation over [n]
+		// 构造一个在 [n] 上的无操作排列。
 		void init(IdxType n)
 		{
 			mSrc2Dst.resize(n);
@@ -112,6 +122,7 @@ namespace volePSI
 
 		// construct permutation over [n] given the destination to source mapping.
 		// the mapping dst2Src can be incomplete.
+		// 根据目标到源的映射构造 [n] 上的排列。映射 dst2Src 可以是不完整的。
 		void initDst2Src(IdxType n, span<IdxType> dst2Src)
 		{
 			std::set<IdxType> srcs;
@@ -151,30 +162,35 @@ namespace volePSI
 		}
 
 		// encode i as a source index.
+		// 将 i 编码为源索引。
 		SrcIdx src(IdxType i)const
 		{
 			return SrcIdx{ i };
 		}
 
 		// encode i as a destination index.
+		// 将 i 编码为目标索引。
 		DstIdx dst(IdxType i)const
 		{
 			return DstIdx{ i };
 		}
 
 		// get the source index for the destination index i.
+		// 获取目标索引 i 的源索引。
 		SrcIdx src(DstIdx i)const
 		{
 			return SrcIdx{ mDst2Src[i.mIdx] };
 		}
 
 		// get the destination index for the source index i.
+		// 获取源索引 i 的目标索引。
 		DstIdx dst(SrcIdx i)const
 		{
 			return DstIdx{ mSrc2Dst[i.mIdx] };
 		}
 
-		// invert the pemutation
+		// invert the permutation
+		// 反转排列。
 		Permutation invert() const
 		{
 			Permutation p;
@@ -184,6 +200,7 @@ namespace volePSI
 		}
 
 		// swap the destination position.
+		// 交换目标位置。
 		void swap(DstIdx& i, DstIdx& j)
 		{
 			auto si = mDst2Src[i.mIdx];
@@ -194,10 +211,10 @@ namespace volePSI
 		}
 	};
 
-
 	// An efficient data structure for tracking the weight of the 
 	// paxos columns (node), which excludes the rows which have 
 	// already been fixed (assigned to C). 
+	// 一种高效的数据结构，用于跟踪 paxos 列（节点）的权重，排除已经固定（分配给 C）的行。
 	template<typename IdxType>
 	struct WeightData
 	{
@@ -207,12 +224,15 @@ namespace volePSI
 		{
 
 			// The current of this column.
+			// 此列的当前权重。
 			IdxType mWeight;
 
 			// The previous column with the same weight.
+			// 具有相同权重的前一列。
 			IdxType mPrevWeightNode = NullNode;
 
 			// the next column with the same weight
+			// 具有相同权重的下一列。
 			IdxType mNextWeightNode = NullNode;
 		};
 
@@ -224,12 +244,14 @@ namespace volePSI
 		u64 mNodeAllocSize = 0;
 
 		// returns the index of the node
+		// 返回节点的索引。
 		IdxType idxOf(WeightNode& node)
 		{
 			return static_cast<IdxType>(&node - mNodes.data());
 		}
 
 		// returns the size of the set of weight w columns.
+		// 返回权重 w 列的集合大小。
 		u64 setSize(u64 w)
 		{
 			u64 s = 0;
@@ -248,7 +270,8 @@ namespace volePSI
 		}
 
 		// add the node/column to the data structure. Assumes
-		// it is no already in it. 
+		// it is not already in it. 
+		// 将节点/列添加到数据结构中。假设它尚未在其中。
 		void pushNode(WeightNode& node)
 		{
 			assert(node.mNextWeightNode == NullNode);
@@ -273,6 +296,7 @@ namespace volePSI
 		}
 
 		// remove the given node/column from the data structure.
+		// 从数据结构中移除给定的节点/列。
 		void popNode(WeightNode& node)
 		{
 			if (node.mPrevWeightNode == NullNode)
@@ -313,6 +337,7 @@ namespace volePSI
 		}
 
 		// decrease the weight of a given node/column
+		// 减少给定节点/列的权重。
 		void decementWeight(WeightNode& node)
 		{
 			assert(node.mWeight);
@@ -322,6 +347,7 @@ namespace volePSI
 		}
 
 		// returns the node with minimum weight.
+		// 返回权重最小的节点。
 		WeightNode& getMinWeightNode()
 		{
 			for (u64 i = 1; i < mWeightSets.size(); ++i)
@@ -338,6 +364,7 @@ namespace volePSI
 
 		// initialize the data structure with the current set of 
 		// node/column weights.
+		// 用当前节点/列权重初始化数据结构。
 		void init(span<IdxType> weights)
 		{
 			//mNodes.clear();
@@ -392,8 +419,6 @@ namespace volePSI
 #endif // !NDEBUG
 		}
 
-
-
 		void validate()
 		{
 			std::set<u64> nodes;
@@ -443,12 +468,12 @@ namespace volePSI
 	//std::ostream& operator<<(std::ostream& o, const PaxosDiff<IdxType>&);
 
 	// A permutation over the rows and columns of the paxos matrix.
+	// 在 paxos 矩阵的行和列上进行排列。
 	template<typename IdxType>
 	struct PaxosPermutation
 	{
 		Permutation<IdxType> mColPerm, mRowPerm;
 	};
-
 
 	template<typename IdxType>
 	struct PaxosHash
@@ -476,8 +501,6 @@ namespace volePSI
 			}
 		}
 
-
-
 		void mod32(u64* vals, u64 modIdx) const;
 
 		void hashBuildRow32(const block* input, IdxType* rows, block* hash) const;
@@ -494,6 +517,7 @@ namespace volePSI
 	// This differs from PxMatrix which has elements that 
 	// each a vector of type T's. PxVector are more efficient
 	// since we can remove an "inner for-loop." 
+	// 当元素类型为 T 时的 Paxos 向量类型。这与 PxMatrix 不同，后者的元素是类型 T 的向量。PxVector 更高效，因为我们可以去掉一个“内部循环”。
 	template<typename T>
 	struct PxVector
 	{
@@ -522,39 +546,47 @@ namespace volePSI
 			, mElements(mOwning.get(), size)
 		{ }
 
-
-		// return a iterator to the i'th element. Should be pointer symmatics
+		// return a iterator to the i'th element. Should be pointer symantics
+		// 返回指向第 i 个元素的迭代器。应为指针语义。
 		inline iterator operator[](u64 i) { return &mElements[i]; }
 
-		// return a iterator to the i'th element. Should be pointer symmatics
+		// return a iterator to the i'th element. Should be pointer symantics
+		// 返回指向第 i 个元素的迭代器。应为指针语义。
 		inline const_iterator operator[](u64 i) const { return &mElements[i]; }
 
 		// return the size of the vector
+		// 返回向量的大小。
 		inline auto size() const { return mElements.size(); }
 
 		// return a subset of the vector, starting at index offset and of size count. 
 		// if count = -1, then get the rest of the vector.
+		// 返回向量的子集，从索引偏移量开始，大小为 count。如果 count = -1，则获取其余向量。
 		inline PxVector subspan(u64 offset, u64 count = -1) { return mElements.subspan(offset, count); }
 
 		// return a subset of the vector, starting at index offset and of size count. 
 		// if count = -1, then get the rest of the vector.
+		// 返回向量的子集，从索引偏移量开始，大小为 count。如果 count = -1，则获取其余向量。
 		inline PxVector<const value_type> subspan(u64 offset, u64 count = -1) const { 
 			return PxVector<const value_type>(mElements.subspan(offset, count));
 		}
 
 		// populate the vector with the zero element.
+		// 用零元素填充向量。
 		inline void zerofill() { memset(mElements.data(), 0, mElements.size_bytes()); }
 
 		// The default implementation of helper for PxVector.
 		// This class performs operations of the elements of PxVector.
+		// PxVector 的默认实现助手。此类执行 PxVector 元素的操作。
 		struct Helper
 		{
 			// mutable version of value_type
+			// value_type 的可变版本。
 			using mut_value_type = std::remove_const_t<value_type>;
 			using mut_iterator = mut_value_type*;
 
 			// internal mask used to multiply a value with a bit. 
 			// Assumes the zero bit string is the zero element.
+			// 用于将值与位相乘的内部掩码。假设零位字符串是零元素。
 			std::array<mut_value_type, 2> zeroOneMask;
 
 			Helper() {
@@ -565,21 +597,27 @@ namespace volePSI
 			Helper(const Helper&) = default;
 
 			// return a element that the user can use.
+			// 返回用户可以使用的元素。
 			inline static mut_value_type newElement() { return {}; }
 
 			// return the iterator for the return type of newElement().
+			// 返回 newElement() 的返回类型的迭代器。
 			mut_iterator asPtr(mut_value_type& t) { return &t; }
 
 			// return a vector of elements that the user can use.
+			// 返回用户可以使用的元素向量。
 			inline static PxVector<mut_value_type> newVec(u64 size) { return { size }; }
 
 			// assign the src to the dst, ie *dst = *src.
+			// 将 src 赋值给 dst，即 *dst = *src。
 			inline static void assign(mut_iterator dst, const_iterator src) { *dst = *src; }
 
 			// add the src to the dst, ie *dst += *src.
+			// 将 src 加到 dst，即 *dst += *src。
 			inline static void add(mut_iterator dst, const_iterator src1) { *dst = *dst ^ *src1; }
 
 			// multiply src1 with m and add the result to the dst, ie *dst += (*src) * m.
+			// 将 src1 与 m 相乘并将结果加到 dst，即 *dst += (*src) * m。
 			inline static void multAdd(mut_iterator dst, const_iterator src1, const block& m) {
 
 				if constexpr (std::is_same<block, mut_value_type>::value)
@@ -589,6 +627,7 @@ namespace volePSI
 			}
 
 			// multiply src1 with bit and add the result to the dst, ie *dst += (*src) * bit.
+			// 将 src1 与位相乘并将结果加到 dst，即 *dst += (*src) * bit。
 			inline void multAdd(mut_iterator dst, const_iterator src1, const u8& bit) {
 
 				assert(bit < 2);
@@ -596,17 +635,19 @@ namespace volePSI
 			}
 
 			// return the iterator plus the given number of rows
+			// 返回迭代器加上给定的行数。
 			inline static auto iterPlus(const_iterator p, u64 i) { return p + i; }
 
 			// return the iterator plus the given number of rows
+			// 返回迭代器加上给定的行数。
 			inline static auto iterPlus(mut_iterator p, u64 i) { return p + i; }
 
 			// randomize the given element.
+			// 随机化给定元素。
 			inline static void randomize(mut_iterator p, oc::PRNG& prng)
 			{
 				prng.get(p, 1);
 			}
-
 
 			inline static auto eq(iterator p0, iterator p1)
 			{
@@ -615,18 +656,18 @@ namespace volePSI
 		};
 
 		// return the default helper for this vector type.
+		// 返回此向量类型的默认助手。
 		static Helper defaultHelper()
 		{
 			return {};
 		}
 	};
 
-
-
 	// A Paxos vector type when the elements are each 
 	// an array of type T's with length mCols. mCols can 
 	// be set at runtime. This differs from PxVector in
 	// that PxVector has mCols hard coded to 1.
+	// 当元素是每个长度为 mCols 的类型 T 的数组时的 Paxos 向量类型。mCols 可以在运行时设置。这与 PxVector 不同，PxVector 的 mCols 硬编码为 1。
 	template<typename T>
 	struct PxMatrix
 	{
@@ -660,23 +701,26 @@ namespace volePSI
 			, mCols(cols)
 		{}
 
-
 		PxMatrix(iterator ptr, u64 rows, u64 cols)
 			: mElements(ptr, rows* cols)
 			, mRows(rows)
 			, mCols(cols)
 		{}
 
-		// return a iterator to the i'th element. Should be pointer symmatics
+		// return a iterator to the i'th element. Should be pointer symantics
+		// 返回指向第 i 个元素的迭代器。应为指针语义。
 		inline iterator operator[](u64 i) { return &mElements[i * mCols]; }
 
-		// return a iterator to the i'th element. Should be pointer symmatics
+		// return a iterator to the i'th element. Should be pointer symantics
+		// 返回指向第 i 个元素的迭代器。应为指针语义。
 		inline const_iterator operator[](u64 i) const { return &mElements[i * mCols]; }
 		
 		// return the size of the vector
+		// 返回向量的大小。
 		inline auto size() const { return mRows; }
 
 		// return a subset of the vector, starting at index offset.
+		// 返回向量的子集，从索引偏移量开始。
 		inline PxMatrix subspan(u64 offset) {
 			assert(mRows >= offset);
 			auto count = mRows - offset;
@@ -684,12 +728,15 @@ namespace volePSI
 		}
 
 		// return a subset of the vector, starting at index offset.
+		// 返回向量的子集，从索引偏移量开始。
 		inline PxMatrix<const value_type> subspan(u64 offset) const {
 			assert(mRows >= offset);
 			auto count = mRows - offset;
 			return MatrixView<const value_type>(mElements.data() + offset * mCols, count, mCols);
 		}
 		// return a subset of the vector, starting at index offset and of size count. 
+		// if count = -1, then get the rest of the vector.
+		// 返回向量的子集，从索引偏移量开始，大小为 count。如果 count = -1，则获取其余向量。
 		inline PxMatrix subspan(u64 offset, u64 count) {
 			assert(mRows >= offset);
 			assert(count <= mRows - offset);
@@ -697,6 +744,8 @@ namespace volePSI
 		}
 
 		// return a subset of the vector, starting at index offset and of size count. 
+		// if count = -1, then get the rest of the vector.
+		// 返回向量的子集，从索引偏移量开始，大小为 count。如果 count = -1，则获取其余向量。
 		inline PxMatrix<const value_type> subspan(u64 offset, u64 count) const {
 			assert(mRows >= offset);
 			assert(count <= mRows - offset);
@@ -704,21 +753,26 @@ namespace volePSI
 		}
 
 		// populate the vector with the zero element.
+		// 用零元素填充向量。
 		inline void zerofill() { memset(mElements.data(), 0, mElements.size_bytes()); }
 
 		// The default implementation of helper for PxVector.
 		// This class performs operations of the elements of PxVector.
+		// PxVector 的默认实现助手。此类执行 PxVector 元素的操作。
 		struct Helper
 		{
 			// mutable version of value_type
+			// value_type 的可变版本。
 			using mut_value_type = std::remove_const_t<value_type>;
 			using mut_iterator = mut_value_type*;
 
 			// the number of columns we should have.
+			// 我们应该有的列数。
 			u64 mCols = 0;
 
 			// internal mask used to multiply a value with a bit. 
 			// Assumes the zero bit string is the zero element.
+			// 用于将值与位相乘的内部掩码。假设零位字符串是零元素。
 			std::array<mut_value_type, 2> zeroOneMask;
 			Helper() {
 				memset(&zeroOneMask[0], 0, sizeof(T));
@@ -727,28 +781,33 @@ namespace volePSI
 
 			Helper(const Helper&) = default;
 
-
 			// return a element that the user can use.
+			// 返回用户可以使用的元素。
 			inline std::vector<value_type> newElement() { return std::vector<value_type>(mCols); }
 			
 			// return the iterator for the return type of newElement().
+			// 返回 newElement() 的返回类型的迭代器。
 			iterator asPtr(std::vector<value_type>& t) { return t.data(); }
 
 			// return a vector of elements that the user can use.
+			// 返回用户可以使用的元素向量。
 			inline PxMatrix<mut_value_type> newVec(u64 size) { return { size, mCols }; }
 
 			// assign the src to the dst, ie *dst = *src.
+			// 将 src 赋值给 dst，即 *dst = *src。
 			inline void assign(mut_iterator dst, const_iterator src) {
 				memcpy(dst, src, sizeof(value_type) * mCols);
 			}
 
 			// add the src to the dst, ie *dst += *src.
+			// 将 src 加到 dst，即 *dst += *src。
 			inline void add(mut_iterator dst, const_iterator src1) {
 				for (u64 i = 0; i < mCols; ++i)
 					dst[i] = dst[i] ^ src1[i];
 			}
 
 			// multiply src1 with m and add the result to the dst, ie *dst += (*src) * m.
+			// 将 src1 与 m 相乘并将结果加到 dst，即 *dst += (*src) * m。
 			inline void multAdd(mut_iterator dst, const_iterator src1, const block& m) {
 
 				if constexpr (std::is_same<block, mut_value_type>::value)
@@ -759,6 +818,7 @@ namespace volePSI
 			}
 
 			// multiply src1 with bit and add the result to the dst, ie *dst += (*src) * bit.
+			// 将 src1 与位相乘并将结果加到 dst，即 *dst += (*src) * bit。
 			inline void multAdd(mut_iterator dst, const_iterator src1, const u8& bit) {
 
 				assert(bit < 2);
@@ -767,18 +827,19 @@ namespace volePSI
 			}
 
 			// return the iterator plus the given number of rows
+			// 返回迭代器加上给定的行数。
 			inline auto iterPlus(const_iterator p, u64 i) { return p + i * mCols; }
 
 			// return the iterator plus the given number of rows
+			// 返回迭代器加上给定的行数。
 			inline auto iterPlus(mut_iterator p, u64 i) { return p + i * mCols; }
 
 			// randomize the given element.
+			// 随机化给定元素。
 			inline void randomize(mut_iterator p, oc::PRNG& prng)
 			{
 				prng.get(p, mCols);
 			}
-
-
 
 			inline auto eq(iterator p0, iterator p1)
 			{
@@ -787,6 +848,7 @@ namespace volePSI
 		};
 
 		// return the default helper for this vector type.
+		// 返回此向量类型的默认助手。
 		Helper defaultHelper() const
 		{
 			Helper h ;
@@ -796,4 +858,3 @@ namespace volePSI
 	};
 
 }
-

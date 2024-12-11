@@ -1,9 +1,11 @@
+#include "volePSI/tests/UnitTests.h"
+#include "volePSI/tests/Paxos_Tests.h"
+#include "volePSI/fileBased.h"
+
 #include "cryptoTools/Common/Log.h"
 
-#include "volePSI/fileBased.h"
-#include "tests/Paxos_Tests.h"
-#include "tests/UnitTests.h"
 #include "perf.h"
+
 
 int main(int argc, char** argv)
 {
@@ -13,19 +15,7 @@ int main(int argc, char** argv)
     //for (oc::u64 i = 0; i < 10000000; ++i)
     //    file << std::setfill('0') << std::setw(32) << i << "\n";
     //return 0;
-    // if (cmd.isSet("in"))
-    // {
-    //     volePSI::doFilePSI(cmd);
-    // }
-    // else if (cmd.isSet("messagePassing"))
-    // {
-    //     messagePassingExample(cmd);
-    // }
-    // else if (cmd.isSet("net"))
-    // {
-    //     networkSocketExample(cmd);
-    // }
-    // else if (cmd.isSet("exp"))
+    
     if (cmd.isSet("exp"))
     {
         Paxos_experiment(cmd);
@@ -37,11 +27,6 @@ int main(int argc, char** argv)
     else if (cmd.isSet("balls"))
     {
         overflow(cmd);
-    }
-    else if(cmd.isSet("u"))
-    {
-        auto r = volePSI_Tests::Tests.runIf(cmd);
-        return r == oc::TestCollection::Result::failed;
     }
     else
     {
