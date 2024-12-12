@@ -6,11 +6,6 @@
 // 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // © 2022 Visa。
-// 特此免费授权任何获得本软件及其相关文档文件（“软件”）的人在不受限制的情况下处理该软件，包括但不限于使用、复制、修改、合并、发布、分发、再许可和/或出售该软件的副本，并允许向其提供软件的人这样做，前提是满足以下条件：
-// 
-// 上述版权声明和本许可声明应包含在所有副本或实质性部分的软件中。
-// 
-// 本软件按“原样”提供，不附有任何形式的保证，无论是明示或暗示，包括但不限于对适销性、特定用途的适用性和不侵权的保证。在任何情况下，作者或版权持有人均不对因使用或其他交易本软件或与本软件有关的任何索赔、损害或其他责任承担责任。
 
 #include <array>
 #include <vector>
@@ -27,19 +22,16 @@ namespace volePSI
 {
 
 	// A permutation (and its inverse) over the set [n].
-	// 在集合 [n] 上的一个排列（及其逆排列）。
 	template<typename IdxType>
 	struct Permutation
 	{
 		// An indexed from the source domain.
-		// 从源域索引的结构。
 		struct SrcIdx
 		{
 			IdxType mIdx;
 		};
 
-		// an index from the destination domain (range)
-		// 从目标域（范围）索引的结构。
+		// an index from the distination domain (range)
 		struct DstIdx
 		{
 			IdxType mIdx;
@@ -80,16 +72,16 @@ namespace volePSI
 			}
 		};
 
+
 		// the permutation in the forward direction, 
 		// mSrc2Dst[i] returns the location i is mapped 
 		// in the output.
-		// 正向排列，mSrc2Dst[i] 返回 i 在输出中的映射位置。
 		std::vector<IdxType> mSrc2Dst;
+
 
 		// the permutation in the backwards direction, 
 		// mDst2Src[i] returns the output location i is mapped 
 		// from in the input.
-		// 反向排列，mDst2Src[i] 返回 i 在输入中的映射位置。
 		std::vector<IdxType> mDst2Src;
 
 		Permutation() = default;
@@ -111,7 +103,6 @@ namespace volePSI
 		}
 
 		// construct a no-op permutation over [n]
-		// 构造一个在 [n] 上的无操作排列。
 		void init(IdxType n)
 		{
 			mSrc2Dst.resize(n);
@@ -211,10 +202,10 @@ namespace volePSI
 		}
 	};
 
+
 	// An efficient data structure for tracking the weight of the 
 	// paxos columns (node), which excludes the rows which have 
 	// already been fixed (assigned to C). 
-	// 一种高效的数据结构，用于跟踪 paxos 列（节点）的权重，排除已经固定（分配给 C）的行。
 	template<typename IdxType>
 	struct WeightData
 	{
@@ -270,8 +261,7 @@ namespace volePSI
 		}
 
 		// add the node/column to the data structure. Assumes
-		// it is not already in it. 
-		// 将节点/列添加到数据结构中。假设它尚未在其中。
+		// it is no already in it. 
 		void pushNode(WeightNode& node)
 		{
 			assert(node.mNextWeightNode == NullNode);
@@ -296,7 +286,6 @@ namespace volePSI
 		}
 
 		// remove the given node/column from the data structure.
-		// 从数据结构中移除给定的节点/列。
 		void popNode(WeightNode& node)
 		{
 			if (node.mPrevWeightNode == NullNode)
@@ -337,7 +326,6 @@ namespace volePSI
 		}
 
 		// decrease the weight of a given node/column
-		// 减少给定节点/列的权重。
 		void decementWeight(WeightNode& node)
 		{
 			assert(node.mWeight);
@@ -347,7 +335,6 @@ namespace volePSI
 		}
 
 		// returns the node with minimum weight.
-		// 返回权重最小的节点。
 		WeightNode& getMinWeightNode()
 		{
 			for (u64 i = 1; i < mWeightSets.size(); ++i)
@@ -419,6 +406,8 @@ namespace volePSI
 #endif // !NDEBUG
 		}
 
+
+
 		void validate()
 		{
 			std::set<u64> nodes;
@@ -468,12 +457,12 @@ namespace volePSI
 	//std::ostream& operator<<(std::ostream& o, const PaxosDiff<IdxType>&);
 
 	// A permutation over the rows and columns of the paxos matrix.
-	// 在 paxos 矩阵的行和列上进行排列。
 	template<typename IdxType>
 	struct PaxosPermutation
 	{
 		Permutation<IdxType> mColPerm, mRowPerm;
 	};
+
 
 	template<typename IdxType>
 	struct PaxosHash
@@ -501,6 +490,8 @@ namespace volePSI
 			}
 		}
 
+
+
 		void mod32(u64* vals, u64 modIdx) const;
 
 		void hashBuildRow32(const block* input, IdxType* rows, block* hash) const;
@@ -517,7 +508,6 @@ namespace volePSI
 	// This differs from PxMatrix which has elements that 
 	// each a vector of type T's. PxVector are more efficient
 	// since we can remove an "inner for-loop." 
-	// 当元素类型为 T 时的 Paxos 向量类型。这与 PxMatrix 不同，后者的元素是类型 T 的向量。PxVector 更高效，因为我们可以去掉一个“内部循环”。
 	template<typename T>
 	struct PxVector
 	{
@@ -858,3 +848,7 @@ namespace volePSI
 	};
 
 }
+
+
+
+

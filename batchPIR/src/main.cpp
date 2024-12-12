@@ -54,15 +54,15 @@ int vectorized_pir_main(int argc, char *argv[])
         return 1;
     }
 
-    uint64_t num_databases = 128;  // 假设数据库数量为128
-    uint64_t first_dim = 64;       // 假设数据的第一维大小为64
+    uint64_t num_databases = 128; // 假设数据库数量为128
+    uint64_t first_dim = 64;      // 假设数据的第一维大小为64
 
     // 创建加密参数
     auto encryption_params = utils::create_encryption_parameters();
 
     // 根据数据库条目数、条目大小和第一维大小创建 PirParams 对象
     PirParams params(db_entries, entry_size, num_databases, encryption_params, first_dim);
-    params.print_values();  // 打印参数
+    params.print_values(); // 打印参数
 
     // 创建服务器和客户端对象
     Server server(params);
@@ -84,7 +84,7 @@ int vectorized_pir_main(int argc, char *argv[])
     vector<uint64_t> entry_indices;
     for (int i = 0; i < num_databases; i++)
     {
-        entry_indices.push_back(0);  // 这里默认使用 0 索引，实际可以根据需求生成随机值
+        entry_indices.push_back(0); // 这里默认使用 0 索引，实际可以根据需求生成随机值
     }
 
     // 客户端生成查询
@@ -134,13 +134,13 @@ int hashing_test_main(int argc, char *argv[])
 
     vector<uint64_t> myvec(batch_size);
 
-    int trials = std::pow(2, 30);  // 设定试验次数为2的30次方
+    int trials = std::pow(2, 30); // 设定试验次数为2的30次方
     for (int j = 0; j < trials; j++)
     {
         std::cout << "Trial " << j << "/" << trials << ": ";
         for (int i = 0; i < batch_size; i++)
         {
-            myvec[i] = rand() % num_entries;  // 随机生成条目索引
+            myvec[i] = rand() % num_entries; // 随机生成条目索引
         }
 
         // 进行哈希测试
@@ -157,15 +157,15 @@ int hashing_test_main(int argc, char *argv[])
     return 0;
 }
 
-int batchpir_main(int argc, char* argv[])
+int batchpir_main(int argc, char *argv[])
 {
     const int client_id = 0;
     // 定义输入选择，包含批量大小、条目数量和条目大小
     std::vector<std::array<size_t, 3>> input_choices;
     input_choices.push_back({32, 1048576, 32});
-    input_choices.push_back({64, 1048576, 32});
-    input_choices.push_back({256, 1048576, 32});
-    
+    // input_choices.push_back({64, 1048576, 32});
+    // input_choices.push_back({256, 1048576, 32});
+
     // 用于记录不同阶段的时间
     std::vector<std::chrono::milliseconds> init_times;
     std::vector<std::chrono::milliseconds> query_gen_times;
@@ -179,7 +179,7 @@ int batchpir_main(int argc, char* argv[])
         std::cout << "             Starting example " << (iteration + 1) << "               " << std::endl;
         std::cout << "***************************************************" << std::endl;
 
-        const auto& choice = input_choices[iteration];
+        const auto &choice = input_choices[iteration];
 
         // 将输入选择转换为字符串
         string selection = std::to_string(choice[0]) + "," + std::to_string(choice[1]) + "," + std::to_string(choice[2]);
@@ -271,6 +271,8 @@ int batchpir_main(int argc, char* argv[])
 int main(int argc, char *argv[])
 {
     // 调用 batchpir_main 函数
-    batchpir_main(argc, argv);
+    // vectorized_pir_main(argc, argv);
+    // batchpir_main(argc, argv);
+    vectorized_pir_main(argc, argv);
     return 0;
 }

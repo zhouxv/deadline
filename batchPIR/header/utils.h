@@ -10,99 +10,111 @@
 #include "database_constants.h"
 #include "seal/seal.h"
 
-
-typedef  std::vector<seal::Ciphertext> PIRQuery;
-typedef  seal::Ciphertext PIRResponse;
-typedef  std::vector<seal::Ciphertext> PIRResponseList;
-typedef  std::vector<std::vector<unsigned char>>  RawDB;
-typedef  std::vector<std::vector<unsigned char>>  RawResponses;
-typedef  std::vector<uint64_t> Row;
-typedef  std::vector<Row> PirDB;
+typedef std::vector<seal::Ciphertext> PIRQuery;
+typedef seal::Ciphertext PIRResponse;
+typedef std::vector<seal::Ciphertext> PIRResponseList;
+typedef std::vector<std::vector<unsigned char>> RawDB;
+typedef std::vector<std::vector<unsigned char>> RawResponses;
+typedef std::vector<uint64_t> Row;
+typedef std::vector<Row> PirDB;
 using namespace std;
 using namespace seal;
 
-namespace utils {
+namespace utils
+{
 
     // Returns the next power of 2 for a given number
-    inline size_t next_power_of_two(size_t n) {
+    inline size_t next_power_of_two(size_t n)
+    {
         return pow(2, ceil(log2(n)));
     }
 
     // Generates a random number between 0 and max_value
-    inline uint32_t generate_random_number(uint32_t max_value) {
+    inline uint32_t generate_random_number(uint32_t max_value)
+    {
         return rand() % (max_value + 1);
     }
 
-
     // Prints an error message and exits the program with an error code
-    inline void error_exit(const std::string& error_message, int error_code = 1) {
+    inline void error_exit(const std::string &error_message, int error_code = 1)
+    {
         std::cerr << "Error: " << error_message << std::endl;
         exit(error_code);
     }
 
     // Prints a message to the console
-    inline void print_message(const std::string& message) {
+    inline void print_message(const std::string &message)
+    {
         std::cout << message << std::endl;
     }
 
-
-    inline std::vector<uint64_t> rotate_vector_row(std::vector<uint64_t>& vec, int rotation_Amount) {
-        if (vec.empty()) {
+    inline std::vector<uint64_t> rotate_vector_row(std::vector<uint64_t> &vec, int rotation_Amount)
+    {
+        if (vec.empty())
+        {
             return {};
         }
 
-        const size_t row_size = vec.size()/2;
+        const size_t row_size = vec.size() / 2;
         rotation_Amount = rotation_Amount % row_size;
 
         std::vector<uint64_t> temp(vec.size(), 0ULL);
-        for (size_t i = 0; i < row_size; ++i) {
+        for (size_t i = 0; i < row_size; ++i)
+        {
             temp[(i + rotation_Amount) % row_size] = vec[i];
             temp[(i + rotation_Amount) % row_size + row_size] = vec[i + row_size];
         }
         return temp;
     }
 
-    inline std::vector<uint64_t> rotate_vector_col(std::vector<uint64_t>& vec) {
-        if (vec.empty()) {
+    inline std::vector<uint64_t> rotate_vector_col(std::vector<uint64_t> &vec)
+    {
+        if (vec.empty())
+        {
             return {};
         }
 
-        const size_t row_size = vec.size()/2;
-        
+        const size_t row_size = vec.size() / 2;
+
         uint64_t tmp_slot = 0;
-        for (size_t i = 0; i < row_size; ++i) {
+        for (size_t i = 0; i < row_size; ++i)
+        {
             tmp_slot = vec[i];
             vec[i] = vec[row_size + i];
             vec[row_size + i] = tmp_slot;
         }
-      
-    return vec;
+
+        return vec;
     }
-    
-    inline std::size_t hash_mod(size_t id, size_t nonce, size_t data, size_t total_buckets){
+
+    inline std::size_t hash_mod(size_t id, size_t nonce, size_t data, size_t total_buckets)
+    {
         std::hash<std::string> hasher1;
         return hasher1(std::to_string(id) + std::to_string(nonce) + std::to_string(data)) % total_buckets;
     }
 
-    inline std::vector<size_t> get_candidate_buckets(size_t data, size_t num_candidates , size_t total_buckets){
+    inline std::vector<size_t> get_candidate_buckets(size_t data, size_t num_candidates, size_t total_buckets)
+    {
         std::vector<size_t> candidate_buckets;
-         
-        for (int i = 0; i < num_candidates; i++){
+
+        for (int i = 0; i < num_candidates; i++)
+        {
             size_t nonce = 0;
-            auto bucket = hash_mod( i, nonce, data, total_buckets);
-            while (std::find(candidate_buckets.begin(), candidate_buckets.end(), bucket) != candidate_buckets.end()){
+            auto bucket = hash_mod(i, nonce, data, total_buckets);
+            while (std::find(candidate_buckets.begin(), candidate_buckets.end(), bucket) != candidate_buckets.end())
+            {
                 nonce += 1;
-                bucket = hash_mod( i, nonce, data, total_buckets);
+                bucket = hash_mod(i, nonce, data, total_buckets);
             }
             candidate_buckets.push_back(bucket);
         }
 
         return candidate_buckets;
     }
-    
-    
-    inline void multiply_acum(uint64_t op1, uint64_t op2, __uint128_t& product_acum) {
-        product_acum = product_acum + static_cast<__uint128_t>(op1) * static_cast<__uint128_t>(op2); 
+
+    inline void multiply_acum(uint64_t op1, uint64_t op2, __uint128_t &product_acum)
+    {
+        product_acum = product_acum + static_cast<__uint128_t>(op1) * static_cast<__uint128_t>(op2);
     }
 
     inline seal::EncryptionParameters create_encryption_parameters(string selection = "")
@@ -115,12 +127,14 @@ namespace utils {
         vector<int> CoeffMods = {55, 55, 48, 60};
         seal_params.set_poly_modulus_degree(PolyDegree);
 
-        if(selection == "256,10485,256" ||  selection == "256,10485,32" ){
+        if (selection == "256,10485,256" || selection == "256,10485,32")
+        {
             // use these parameters when internal PIR is 2d and no merging is needed at the end
             PlaintextModBitss = 26;
             CoeffMods = {55, 55, 60};
-
-        }else if(selection == "32,1048576,32" || selection == "64,1048576,32" || selection == "256,104857,32"){
+        }
+        else if (selection == "32,1048576,32" || selection == "64,1048576,32" || selection == "256,104857,32")
+        {
             // use these parameters when internal PIR is 3d but no merging is needed at the end
             PlaintextModBitss = 28;
             CoeffMods = {42, 58, 58, 60};
@@ -129,33 +143,46 @@ namespace utils {
         seal_params.set_coeff_modulus(CoeffModulus::Create(PolyDegree, CoeffMods));
         seal_params.set_plain_modulus(PlainModulus::Batching(PolyDegree, PlaintextModBitss));
 
+        std::cout << "+---------------------------------------------------+" << std::endl;
+        std::cout << "|               ENCRYPTION PARAMETERS               |" << std::endl;
+        std::cout << "+---------------------------------------------------+" << std::endl;
+        std::cout << "|  seal_params_.poly_modulus_degree  = " << seal_params.poly_modulus_degree() << std::endl;
 
-std::cout << "+---------------------------------------------------+" << std::endl;
-std::cout << "|               ENCRYPTION PARAMETERS               |" << std::endl;
-std::cout << "+---------------------------------------------------+" << std::endl;
-std::cout << "|  seal_params_.poly_modulus_degree  = " << seal_params.poly_modulus_degree() << std::endl;
+        auto coeff_modulus_size = seal_params.coeff_modulus().size();
+        std::cout << "|  seal_params_.coeff_modulus().bit_count   = [";
 
-auto coeff_modulus_size = seal_params.coeff_modulus().size();
-std::cout << "|  seal_params_.coeff_modulus().bit_count   = [";
+        for (std::size_t i = 0; i < coeff_modulus_size - 1; i++)
+        {
+            std::cout << seal_params.coeff_modulus()[i].bit_count() << " + ";
+        }
 
-for (std::size_t i = 0; i < coeff_modulus_size - 1; i++)
-{
-    std::cout << seal_params.coeff_modulus()[i].bit_count() << " + ";
-}
+        std::cout << seal_params.coeff_modulus().back().bit_count();
+        std::cout << "] bits" << std::endl;
+        std::cout << "|  seal_params_.coeff_modulus().size = " << seal_params.coeff_modulus().size() << std::endl;
+        std::cout << "|  seal_params_.plain_modulus().bit_count = " << seal_params.plain_modulus().bit_count() << std::endl;
+        std::cout << "+---------------------------------------------------+" << std::endl;
 
-std::cout << seal_params.coeff_modulus().back().bit_count();
-std::cout << "] bits" << std::endl;
-std::cout << "|  seal_params_.coeff_modulus().size = " << seal_params.coeff_modulus().size() << std::endl;
-std::cout << "|  seal_params_.plain_modulus().bit_count = " << seal_params.plain_modulus().bit_count() << std::endl;
-std::cout << "+---------------------------------------------------+" << std::endl;
+        SEALContext context = SEALContext(seal_params);
+        if (!context.parameters_set())
+        {
+            std::cout << "SEAL parameters not valid." << std::endl;
+        }
+        if (!context.first_context_data()->qualifiers().using_batching)
+        {
+            std::cout << "SEAL parameters do not support batching." << std::endl;
+        }
+        if (!context.using_keyswitching())
+        {
+            std::cout << "SEAL parameters do not support key switching." << std::endl;
+        }
 
-
-
-    return seal_params;
+        return seal_params;
     }
 
-    inline void multiply_poly_acum(const uint64_t *ct_ptr, const uint64_t *pt_ptr, size_t size, uint128_t *result) {
-        for (int cc = 0; cc < size; cc += 32) {
+    inline void multiply_poly_acum(const uint64_t *ct_ptr, const uint64_t *pt_ptr, size_t size, uint128_t *result)
+    {
+        for (int cc = 0; cc < size; cc += 32)
+        {
             multiply_acum(ct_ptr[cc], pt_ptr[cc], result[cc]);
             multiply_acum(ct_ptr[cc + 1], pt_ptr[cc + 1], result[cc + 1]);
             multiply_acum(ct_ptr[cc + 2], pt_ptr[cc + 2], result[cc + 2]);
@@ -188,14 +215,8 @@ std::cout << "+---------------------------------------------------+" << std::end
             multiply_acum(ct_ptr[cc + 29], pt_ptr[cc + 29], result[cc + 29]);
             multiply_acum(ct_ptr[cc + 30], pt_ptr[cc + 30], result[cc + 30]);
             multiply_acum(ct_ptr[cc + 31], pt_ptr[cc + 31], result[cc + 31]);
-            
         }
     }
-
- 
-
-
-
 
 } // namespace utils
 

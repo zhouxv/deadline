@@ -1,14 +1,27 @@
 #include "batchpirserver.h"
 
-BatchPIRServer::BatchPIRServer(BatchPirParams &batchpir_params)
+BatchPIRServer::BatchPIRServer(BatchPirParams &params)
+    : is_client_keys_set_(false), is_simple_hash_(false)
 {
-    batchpir_params_ = &batchpir_params;
-    is_client_keys_set_ = false;
-    is_simple_hash_ = false;
+    batchpir_params_ = &params;
+}
 
-    std::cout << "BatchPIRServer: Populating raw database..." << std::endl;
-    populate_raw_db();
-    std::cout << "BatchPIRServer: Raw database populated." << std::endl;
+void BatchPIRServer::setEntries(uint8_t *entries)
+{
+    std::cout << "BatchPIRServer: Populating database..." << std::endl;
+    auto db_entries = batchpir_params_->get_num_entries();
+    auto entry_size = batchpir_params_->get_entry_size();
+
+    // Resize the rawdb vector to the correct size
+    rawdb_.resize(db_entries);
+
+    for (size_t i = 0; i < db_entries; i++)
+    {
+        rawdb_[i].resize(entry_size);
+        memcpy(rawdb_[i].data(), entries + i * entry_size, entry_size);
+    }
+
+    std::cout << "BatchPIRServer: database populated." << std::endl;
 
     std::cout << "BatchPIRServer: Performing simple hash and bucket balancing..." << std::endl;
     simeple_hash();
@@ -94,6 +107,8 @@ void BatchPIRServer::simeple_hash()
     auto num_candidates = batchpir_params_->get_num_hash_funcs();
     buckets_.resize(total_buckets);
 
+    std::cout << total_buckets << " " << db_entries << " " << num_candidates << std::endl;
+
     for (uint64_t i = 0; i < db_entries; i++)
     {
         std::vector<size_t> candidates = utils::get_candidate_buckets(i, num_candidates, total_buckets);
@@ -104,7 +119,7 @@ void BatchPIRServer::simeple_hash()
         }
     }
 
-    // print_stats();
+    print_stats();
 
     batchpir_params_->set_max_bucket_size(get_max_bucket_size());
     balance_buckets();
@@ -200,6 +215,9 @@ void BatchPIRServer::prepare_pir_server()
     size_t per_server_capacity = max_slots / dim_size;
     size_t num_servers = ceil(num_buckets * 1.0 / per_server_capacity);
 
+    std::cout << max_bucket_size << " " << entry_size << " " << dim_size << " " << max_slots
+              << " " << num_buckets << " " << per_server_capacity << " " << num_servers << "\n";
+
     auto remaining_buckets = num_buckets;
     auto previous_idx = 0;
     for (int i = 0; i < num_servers; i++)
@@ -248,7 +266,6 @@ PIRResponseList BatchPIRServer::generate_response(uint32_t client_id, vector<PIR
         responses.push_back(server_list_[i].generate_response(client_id, queries[i]));
     }
 
-    
     return merge_responses(responses, client_id);
 }
 

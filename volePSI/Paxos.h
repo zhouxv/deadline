@@ -2,9 +2,6 @@
 // © 2022 Visa.
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 // 
-// 上述版权声明和本许可声明应包含在软件的所有副本或实质性部分中。
-// 
-// 本软件是按“原样”提供的，不附有任何种类的保证，无论是明示或暗示，包括但不限于对适销性、特定用途的适用性和非侵权的保证。在任何情况下，作者或版权持有者均不对因使用或其他交易中产生的任何索赔、损害或其他责任负责，无论是在合同诉讼、侵权或其他方面。
 
 #include <cassert>
 #include <vector>
@@ -134,14 +131,14 @@ namespace volePSI
 		}
 
 		// initialize the paxos with the given parameters.
-		// 使用给定参数初始化Paxos。
+		// 使用给定参数初始化Paxos, 提供种子
 		void init(u64 numItems, PaxosParam p, block seed);
 
 		// solve/encode the given inputs,value pair. The paxos data 
 		// structure is written to output. input,value should be numItems 
 		// in size, output should be Paxos::size() in size. If the paxos
 		// should be randomized, then provide a PRNG.
-		// 解决/编码给定的输入、值对。Paxos数据结构写入输出。输入、值应为numItems大小，输出应为Paxos::size()大小。如果Paxos应随机化，则提供PRNG。
+		// solve/编码给定的输入值对。Paxos数据结构写入输出。input,value 应为numItems大小，输出应为Paxos::size()大小。如果Paxos应随机化，则提供PRNG。
 		template<typename ValueType>
 		void solve(span<const block> inputs, span<const ValueType> values, span<ValueType> output, oc::PRNG* prng = nullptr)
 		{
@@ -168,6 +165,7 @@ namespace volePSI
 		// set the input keys which define the paxos matrix. After that,
 		// encode can be called more than once.
 		// 设置定义Paxos矩阵的输入密钥。之后，可以多次调用编码。
+		// 将输入数据转化为稀疏矩阵的行列表示，并对列的权重进行统计和重建
 		void setInput(span<const block> inputs);
 
 		// encode the given inputs,value pair based on the already set input. The paxos data 
@@ -301,13 +299,13 @@ namespace volePSI
 			Helper& h);
 
 		// manually set the row indices and the dense values.
-		// 手动设置行索引和稠密值。
+		// 手动设置行索引和稠密值
 		void setInput(MatrixView<IdxType> rows, span<block> dense);
 
 		// manually set the row indices and the dense values. In 
 		// addition, provide the memory that is needed to perform
 		// encoding.
-		// 手动设置行索引和稠密值。此外，提供执行编码所需的内存。
+		// 手动设置行索引和稠密值。此外，提供执行编码所需的内存
 		void setInput(
 			MatrixView<IdxType> rows,
 			span<block> dense,
